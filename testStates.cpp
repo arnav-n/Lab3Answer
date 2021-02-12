@@ -10,17 +10,25 @@ int main() {
 
 	dataAQ theAnswers;
 
-    //read in a csv file and create a vector of objects representing each counties data
-    std::vector<shared_ptr<demogData>> theData = read_csv(
-            "county_demographics.csv", DEMOG);
+    //read in a csv file and create a vector of objects representing hospital data
+    std::vector<shared_ptr<hospitalData>> theHospitalData = read_csvHospital(
+            "hospitals.csv", HOSPITAL);
 
-    theAnswers.createStateData(theData);
+    theAnswers.createStateHospData(theHospitalData);
 
-    string youngestPop = theAnswers.youngestPop();
-  	ASSERT_EQUALS("UT",youngestPop);
+    string lowHosp = theAnswers.LowHospRating();
+    ASSERT_EQUALS("DC", lowHosp);
 
-  	string bachelors = theAnswers.collegeGrads();
-  	ASSERT_EQUALS("DC",bachelors);
+    string highHosp = theAnswers.HighHospRating();
+  	ASSERT_EQUALS("WI", highHosp);
+
+    string highMort = theAnswers.HighMortHospRating();
+    ASSERT_EQUALS("MA", highMort);
+
+  	string highReadmit = theAnswers.HighReadmitHospRating();
+  	ASSERT_EQUALS("UT", highReadmit);
+
+
 
   return 0;
 }

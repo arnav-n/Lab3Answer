@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include "stateDemog.h"
+#include "stateHosp.h"
 
 /*
   data aggregator and query for testing
@@ -14,9 +15,9 @@ class dataAQ {
   public:
     dataAQ();
 
-    /* necessary function to aggregate the data - this CAN and SHOULD vary per
-   student - depends on how they map, etc. */
-    void createStateData(std::vector<shared_ptr<demogData>> theData);
+    //functions to aggregate the data
+    void createStateDemogData(std::vector<shared_ptr<demogData>> theData);
+    void createStateHospData(std::vector<shared_ptr<hospitalData>> theData);
 
     //return the name of the state with the largest population under age 5
     string youngestPop();
@@ -29,15 +30,27 @@ class dataAQ {
     //return the name of the state with the largest population who completed college
     string collegeGrads();
 
-
     string getMinTeenPop();
+
+    string LowHospRating();
+    string HighHospRating();
+    string HighMortHospRating();
+    string HighReadmitHospRating();
+
+    void sortStateHospRatingHighLow(std::vector<stateHosp *>& hospHighToLow);
+    void sortStateHospRatingLowHigh(std::vector<stateHosp *>& hospLowToHigh);
+    void sortStateDemogPovLevelLowHigh(std::vector<stateDemog*>& incomeHighLow);
+    void sortStateDemogPovLevelHighLow(std::vector<stateDemog*>& povLevelHighLow);
     
     friend std::ostream& operator<<(std::ostream &out, const dataAQ &allStateData);
 
     //For testing, ok to have data be public
     //implementation could vary
     //students could also make a map<string, vector<demogData>>
-    std::map<string, stateDemog*> allStateData;
+    std::map<string, stateDemog*> allStateDemogData;
+
+    std::map<string, stateHosp*> allStateHospData;
+
 
 };
 #endif

@@ -1,6 +1,7 @@
 /* helper routines to read out csv data */
 #include "parse.h"
 #include <algorithm>
+#include <cmath>
 
 /* helper to strip out quotes from a string */
 string stripQuotes(std::string temp) {
@@ -38,30 +39,49 @@ void consumeColumnNames(std::ifstream &myFile) {
     // Read the column names (for debugging)
     // Extract each column name for debugging
     while(std::getline(ss, colname, ',')) {
-        std::cout << colname << std::endl;
+    //    std::cout << colname << std::endl;
     }
 }
 
-/* Read one line from a CSV file for county demographic data specifically
-   TODO: for lab01 you will be asked to add fields here - think about type */
+/* Read one line from a CSV file for county demographic data specifically */
 shared_ptr<demogData> readCSVLineDemog(std::string theLine) {
     std::stringstream ss(theLine);
     
     string name = getField(ss);
     string state = getField(ss);
-    double popOver65 = stod(getField(ss));
-    double popUnder18 = stod(getField(ss));
-    double popUnder5 = stod(getField(ss));
-    double bachelorDegreeUp = stod(getField(ss));
-    double highSchoolUp = stod(getField(ss));
+    //turn into mathematical percent
+    double popOver65 = stod(getField(ss))/100.0;
+    double popUnder18 = stod(getField(ss))/100.0;;
+    double popUnder5 = stod(getField(ss))/100.0;;
+    double bachelorDegreeUp = stod(getField(ss))/100.0;;
+    double highSchoolUp = stod(getField(ss))/100.0;;
 
-    return make_shared<demogData>(name, state, popOver65, popUnder18,
-            popUnder5, bachelorDegreeUp, highSchoolUp);
+    //now skip over some data
+    for (int i=0; i < 20; i++)
+        getField(ss);
+
+    //turn into mathematical percent
+    double belowPoverty = stod(getField(ss))/100;
+
+    //now skip over some data 
+    for (int i=0; i < 10; i++)
+        getField(ss);
+
+    int totalPop2014 = stoi(getField(ss));
+
+    //store demographic data as counts
+    return make_shared<demogData>(name, state, round(popOver65*totalPop2014), 
+            round(popUnder18*totalPop2014),
+            round(popUnder5*totalPop2014), 
+            round(bachelorDegreeUp*totalPop2014), 
+            round(highSchoolUp*totalPop2014), 
+            round(belowPoverty*totalPop2014), 
+            totalPop2014);
 }
 
 
 //read from a CSV file (for a given data type) return a vector of the data
-// DO NOT modify for lab01
+// DO NOT modify 
 std::vector<shared_ptr<demogData>> read_csv(std::string filename, typeFlag fileType) {
     //the actual data
     std::vector<shared_ptr<demogData>> theData;
@@ -88,6 +108,55 @@ std::vector<shared_ptr<demogData>> read_csv(std::string filename, typeFlag fileT
                 cout << "ERROR - unknown file type" << endl;
                 exit(0);
             }
+        }
+
+        // Close file
+        myFile.close();
+    }
+
+    return theData;
+}
+
+shared_ptr<hospitalData> readCSVLineHospital(std::string theLine) {
+    std::stringstream ss(theLine);
+    
+    string name = getField(ss);
+    string ignore = getField(ss); //ignore city
+    string state = getField(ss);
+    string type  = getField(ss);
+    string temp = getField(ss);
+    //std::cout << "temp: " << temp << std::endl;
+    //rating can be encoded -1 - fragile
+    int overallRating = std::max(0, stoi(temp));
+    rating mortal(getField(ss));
+    ignore = getField(ss);  //safety - which we skip this time
+    rating readmit(getField(ss));
+
+    return make_shared<hospitalData>(name, state, type, overallRating, mortal, readmit);
+}
+
+// Reads a CSV file (first half from example: https://www.gormanalysis.com/blog/reading-and-writing-csv-files-with-cpp/)
+std::vector<shared_ptr<hospitalData>> read_csvHospital(std::string filename, typeFlag fileType) {
+    //the actual data
+    std::vector<shared_ptr<hospitalData>> theData;
+
+    // Create an input filestream
+    std::ifstream myFile(filename);
+
+    // Make sure the file is open
+    if(!myFile.is_open()) {
+        throw std::runtime_error("Could not open file");
+    }
+
+    if(myFile.good()) {
+        consumeColumnNames(myFile);
+
+        // Helper vars
+        std::string line;
+
+        // Now read data, line by line and create a county info object
+        while(std::getline(myFile, line)) {
+            theData.push_back(readCSVLineHospital(line));
         }
 
         // Close file

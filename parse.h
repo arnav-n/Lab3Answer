@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream> // std::stringstream
 #include "demogData.h"
+#include "hospitalData.h"
 
 /*static functions to help parse CSV data */
 
@@ -34,5 +35,8 @@ std::vector<shared_ptr<demogData>> read_csv(std::string filename, typeFlag fileT
 // Read one line from a CSV file for county demographic data specifically
 shared_ptr<demogData> readCSVLineDemog(std::string theLine);
 
+// Functions to read a CSV file - specific to data type - hospital data
+shared_ptr<hospitalData> readCSVLineHopstial(std::string theLine);
+std::vector<shared_ptr<hospitalData> > read_csvHospital(std::string filename, typeFlag fileType);
 
 #endif
